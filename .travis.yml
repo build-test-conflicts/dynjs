@@ -1,8 +1,27 @@
+
+sudo: required
 language: java
-install: mvn install -s support/settings.xml -DskipTests=true -P,-version
-script: mvn test -s support/settings.xml -P,-version
+
 jdk:
-  - oraclejdk7
-  - openjdk7
-notifications:
-  irc: "irc.freenode.org#dynjs"
+  - openjdk8
+
+script:
+  - mvn clean compile assembly:single
+
+before_deploy:
+    - mkdir MiningBuild
+    - find . -name '*.jar' -exec cp {} ./MiningBuild \;
+    - cd /home/travis/build/build-test-conflicts/dynjs/MiningBuild
+    - tar -zcvf result.tar.gz *
+deploy:
+  provider: releases
+  api_key:
+    secure: $GITHUB_TOKEN
+  file: result.tar.gz
+  name: fetchjar-655fd404f4a827029904c37bcc7ac4941fdc43a2
+  file_glob: true
+  overwrite: true
+  skip_cleanup: true
+  on:
+    all_branches: true 
+            
